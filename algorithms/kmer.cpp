@@ -1,19 +1,4 @@
-#include <stdio.h>
-#include <algorithm>
-#include <fstream>
-#include <iostream>
-#include <string>
-#include <string.h>
-#include <map>
-#include <vector>
-#include "longest_common_subsequence.h"
-#include "longest_common_substring.h"
-
-typedef struct minimizer_info
-{
-    int index;
-    int num_of_frames;
-} minimizer_info_t;
+#include "kmer.h"
 
 int compare(const char *a, const char *b, const int length)
 {
@@ -54,7 +39,7 @@ int find_minimizer(const char *kmer_array, int kmer_size, std::string &minimizer
 
 void minimize_reference(std::string seq, int kmer_size, int minimizer_size,
                        std::map<std::string, int> &minimizer_map, std::map<int,std::vector<minimizer_info_t>> &index_map,
-                       std::vector<int> &minimizers )
+                       std::vector<int> &minimizers,  std::vector<int> &minimizers_locations)
 {
     int unique_id = 0;
     int minimizer_index;
@@ -80,11 +65,10 @@ void minimize_reference(std::string seq, int kmer_size, int minimizer_size,
             minimizer.assign(seq, i + kmer_size - minimizer_size, minimizer_size);
         }
 
-        //std::cout << f << " " << minimizer.c_str() << "  " << prev_minimizer.c_str() << std::endl;
-        
         if (minimizer.compare(prev_minimizer) != 0)
         {
             std::map<std::string, int>::iterator it =  minimizer_map.find(minimizer);
+            
             if ( it ==  minimizer_map.end())
             {
                 minimizer_map[minimizer] = unique_id;
@@ -93,6 +77,7 @@ void minimize_reference(std::string seq, int kmer_size, int minimizer_size,
                 vec.push_back(info);
                 index_map[unique_id] = vec;
                 minimizers.push_back(unique_id);
+                minimizers_locations.push_back(i);
                 unique_id++;
             }
             else
@@ -101,9 +86,9 @@ void minimize_reference(std::string seq, int kmer_size, int minimizer_size,
                 minimizer_info_t info = {i, 1};
                 index_map[id].push_back(info);
                 minimizers.push_back(id);
+                minimizers_locations.push_back(i);
             }
         }
-        
         else
         {
             std::map<std::string, int>::iterator it =  minimizer_map.find(minimizer);
@@ -111,15 +96,14 @@ void minimize_reference(std::string seq, int kmer_size, int minimizer_size,
             std::vector<minimizer_info_t> vec = index_map[id];
             vec.back().num_of_frames++;
         }
+
         prev_minimizer.clear();
         prev_minimizer.assign(minimizer);
-        
     }
-    
 }
 
 void minimize_sequence(std::string seq, int kmer_size, int minimizer_size,
-                       std::map<std::string, int> &minimizer_map, std::map<int,std::vector<minimizer_info_t>> &index_map,
+                       std::map<std::string, int> &minimizer_map,
                        std::vector<int> &minimizers )
 {
     int minimizer_index;
@@ -146,7 +130,6 @@ void minimize_sequence(std::string seq, int kmer_size, int minimizer_size,
             minimizer.assign(seq, i + kmer_size - minimizer_size, minimizer_size);
         }
 
-
         if (minimizer.compare(prev_minimizer) != 0)
         {
             std::map<std::string, int>::iterator it =  minimizer_map.find(minimizer);
@@ -161,8 +144,6 @@ void minimize_sequence(std::string seq, int kmer_size, int minimizer_size,
                 minimizers.push_back(id);
             }
         }
-        //std::cout <<minimizer <<"  "<<minimizers.back()<<std::endl;
-        
         prev_minimizer.clear();
         prev_minimizer.assign(minimizer);
     }
@@ -171,28 +152,81 @@ void minimize_sequence(std::string seq, int kmer_size, int minimizer_size,
 void create_complement(std::string &complement,std::string original)
 {
     std::reverse(original.begin(), original.end());
-    std::string inverted;
 
     for (int i = 0; i < original.size(); i++)
     {
         if (original[i] == 'A')
-            inverted.push_back('T');
+            complement.push_back('T');
         else if (original[i] == 'T')
-            inverted.push_back('A');
+            complement.push_back('A');
         else if (original[i] == 'G')
-            inverted.push_back('C');
+            complement.push_back('C');
         else if (original[i] == 'C')
-            inverted.push_back('G');
+            complement.push_back('G');
     }
 }
 
-
-
-int main()
+int read_reference(std::string& file_path, std::string& reference)
 {
-    int kmer_size = 10, minimizer_size = 4;
-    std::string reference = "ATTACGCGATACGTAGCATGCGTAGCGTATTTACGTACAACGTGAACGTGTCAAAGTCCTTCACA";
-    std::string sequence = "GCGTAACGATTTACGTACA"; //original GCGTAGCGTATTTACGTACA
+    std::ifstream file;
+    char file_line[256];
+
+    file.open(file_path, std::ifstream::in);
+
+    if (!file.is_open()){
+        printf("Error opening file %s",file_path.c_str());
+        return -1;
+    }
+
+    file.getline(file_line, 256);
+
+    while (true)
+    {
+        file.getline(file_line, 256);
+        if (strlen(file_line) == 0)
+            break;
+        reference.append(file_line);
+    }
+
+    return 0;
+}
+
+int read_sequence(std::ifstream& sequences_file,std::string &sequence)
+{
+    char sequence_info[256] = {0};
+    if (!sequences_file.is_open()){
+        printf("File not open.");
+        return 1;
+    }
+
+    sequences_file.getline(sequence_info, 256);
+
+    if ( strlen(sequence_info) == 0)
+    {
+        sequences_file.close();
+        return 2;
+    }
+    while(true)
+    {
+        char c = (char) sequences_file.get();
+        if (c == '\n')
+            break;
+        sequence.push_back(c);
+    }
+
+    return 0;
+}
+
+
+#ifdef KMER
+int main()
+#else
+int kmer_main()
+#endif
+{
+    int kmer_size = 15, minimizer_size = 5;
+    std::string reference;
+    std::string sequence;
     char file_line[256];
     std::ifstream file;
     std::ifstream sequences;
@@ -200,90 +234,40 @@ int main()
     std::map<std::string, int> minimizer_map;
     std::map<int,std::vector<minimizer_info_t>> index_map;
     std::vector<int> minimizers;
+    std::vector<int> minimizers_locations;
     std::vector<int> sequence_minimizers;
+    std::vector<int> sequence_minimizers_reverse;
+    std::string reverse;
+    std::string reference_file("data/ecoli.fasta");
+    std::string sequence_file("data/ecoli_simulated_reads.fasta");
 
-    minimize_reference(reference, kmer_size, minimizer_size, minimizer_map, index_map, minimizers);
-    minimize_sequence(sequence, kmer_size, minimizer_size, minimizer_map, index_map, sequence_minimizers);
+    int x = read_reference(reference_file, reference);
 
+    if (x == -1)
+        return 0;
 
-    int *a = &minimizers[0];
-    int *b = &sequence_minimizers[0];
+    minimize_reference(reference, kmer_size, minimizer_size, minimizer_map, index_map, minimizers, minimizers_locations);
 
-    for(auto el : minimizers)
-    {
-        printf("%2d ",el);
-    }
-    printf("\n");
+    sequences.open(sequence_file, std::ifstream::in);
 
-    for(auto el : sequence_minimizers)
-    {
-        printf("%2d ",el);
-    }
-    printf("\n");
+    read_sequence(sequences, sequence);
 
-
-    subsequence_info_t rez = subsequence_size<int>(a, minimizers.size(), b, sequence_minimizers.size());
-    printf("Subsequence\n Reference first index: %ld, last_index: %ld, length: %ld\n", rez.first_index, rez.last_index, rez.length);
-
-    substring_info_t rez2 = substring_size<int>(a, minimizers.size(), b, sequence_minimizers.size());
-    printf("Substring\n Reference first index: %ld, length: %ld\n", rez2.first_index, rez2.length);
-
-    return 0;
-
-    
-/*  // reading from file
-
-    file.open("data/lambda.fasta", std::ifstream::in);
-
-    if (!file.is_open()){
-        printf("Error opening file.");
-        return 1;
-    }
-
-    file.getline(file_line, 256);
-
-    std::cout << file_line << "\n";
-    reference.clear();
-    seqence.clear();
-    while (true)
-    {
-        file.getline(file_line, 256);
-        if (strlen(file_line) == 0)
-            break;
-        kmer.append(file_line);
-
-    }
-    minimize_reference(reference, kmer_size, minimizer_size, minimizer_map, index_map, minimizers);
-
-    sequences.open("data/lambda_simulated_reads.fasta", std::ifstream::in);
-
-    if (!sequences.is_open()){
-        printf("Error opening file.");
-        return 1;
-    }
-
-    sequences.getline(file_line, 256);
-    
-    while(true)
-    {
-        char c = (char) sequences.get();
-        if (c == '\n')
-            break;
-        sequence.push_back(c);
-    }
-
-    minimize_sequence(sequence, kmer_size, minimizer_size, minimizer_map, index_map, sequence_minimizers);
+    minimize_sequence(sequence, kmer_size, minimizer_size, minimizer_map, sequence_minimizers);
 
     int *a = &minimizers[0];
     int *b = &sequence_minimizers[0];
 
     subsequence_info_t rez = subsequence_size<int>(a, minimizers.size(), b, sequence_minimizers.size());
 
-    printf("\n%ld %ld %ld\n",  rez.length, rez.first_index, rez.last_index);
+    printf("sequence original: len %ld minimizer indexes %ld %ld, original indexes %d %d \n",  rez.length, rez.first_index, rez.last_index, minimizers_locations[rez.first_index], minimizers_locations[rez.last_index]);
 
+    create_complement(reverse, sequence);
+    minimize_sequence(reverse, kmer_size, minimizer_size, minimizer_map, sequence_minimizers_reverse);
 
-    substring_info_t rez2 = substring_size<int>(a, minimizers.size(), b, sequence_minimizers.size());
+    a = &minimizers[0];
+    b = &sequence_minimizers_reverse[0];
 
-    printf("\n%ld %ld %ld\n",  rez2.length, rez2.first_index, rez2.first_index + rez2.length);
-*/
+    rez = subsequence_size<int>(a, minimizers.size(), b, sequence_minimizers_reverse.size());
+
+    printf("sequence reverse: len %ld minimizer indexes %ld %ld, original indexes %d %d \n",  rez.length, rez.first_index, rez.last_index, minimizers_locations[rez.first_index], minimizers_locations[rez.last_index]);
 }

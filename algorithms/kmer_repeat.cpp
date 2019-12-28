@@ -169,18 +169,17 @@ void minimize_sequence(std::string seq, int kmer_size, int minimizer_size,
 void create_complement(std::string &complement,std::string original)
 {
     std::reverse(original.begin(), original.end());
-    std::string inverted;
 
     for (int i = 0; i < original.size(); i++)
     {
         if (original[i] == 'A')
-            inverted.push_back('T');
+            complement.push_back('T');
         else if (original[i] == 'T')
-            inverted.push_back('A');
+            complement.push_back('A');
         else if (original[i] == 'G')
-            inverted.push_back('C');
+            complement.push_back('C');
         else if (original[i] == 'C')
-            inverted.push_back('G');
+            complement.push_back('G');
     }
 }
 
