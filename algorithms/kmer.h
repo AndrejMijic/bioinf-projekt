@@ -24,10 +24,10 @@ typedef struct minimizer_info
 int compare(const char *a, const char *b, const int length);
 int find_minimizer(const char *kmer_array, int kmer_size, std::string &minimizer, int minimizer_size);
 void minimize_reference(std::string seq, int kmer_size, int minimizer_size,
-                       std::map<std::string, int> &minimizer_map, std::map<int,std::vector<minimizer_info_t>> &index_map,
-                       std::vector<int> &minimizers,  std::vector<int> &minimizers_locations);
+                        std::map<std::string, int> &minimizer_map, std::map<int,std::vector<minimizer_info_t>> &index_map,
+                        std::vector<int> &minimizers,  std::vector<int> &minimizers_locations);
 void minimize_sequence(std::string seq, int kmer_size, int minimizer_size,
-                       std::map<std::string, int> &minimizer_map, 
+                       std::map<std::string, int> &minimizer_map,
                        std::vector<int> &minimizers );
 void create_complement(std::string &complement,std::string original);
 int read_reference(std::string& file_path, std::string& reference);
