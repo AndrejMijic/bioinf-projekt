@@ -3,7 +3,7 @@
 #include <thread>
 #include <mutex>
 
-#define PRINT
+#define RPRINT
 
 typedef struct occurrence {
     int A = 0;
@@ -47,17 +47,19 @@ void sequence_to_reference_map(std::ifstream &sequences, std::string &reference,
                                std::vector<int> &minimizers,
                                std::vector<int> &minimizers_locations,
                                std::vector<occurrence_t> &nucliobase_occurrence,
-                               int kmer_size, int minimizer_size, int x) {
+                               int kmer_size, int minimizer_size, int thread_id) {
     std::string sequence;
     std::string reverse;
     std::vector<int> sequence_minimizers;
     std::vector<int> sequence_minimizers_reverse;
-
+    std::pair<std::string, std::string> r;
     while (1) {
         sequence.clear();
         reverse.clear();
         sequence_minimizers.clear();
         sequence_minimizers_reverse.clear();
+        r.first.clear();
+        r.second.clear();
 
         // thread saftey
         file_mtx.lock();
@@ -66,10 +68,10 @@ void sequence_to_reference_map(std::ifstream &sequences, std::string &reference,
         file_mtx.unlock();
 
 
-        if (ret == 2)
+        if (ret == -2)
             break; // final sequence was read
 
-        if (ret == 1)
+        if (ret == -1)
             break; // another thread closed the file
 
         create_complement(reverse, sequence);
@@ -88,7 +90,7 @@ void sequence_to_reference_map(std::ifstream &sequences, std::string &reference,
         if (sequence_rez.length != 0)
         {
             setbuf(stdout, 0);
-            printf("%ld %ld %ld %d %d %d\n", sequence_rez.length, sequence_rez.first_index,
+            printf("%d %d %d %d %d %d\n", sequence_rez.length, sequence_rez.first_index,
                    sequence_rez.last_index, minimizers_locations[sequence_rez.first_index],
                    minimizers_locations[sequence_rez.last_index] + kmer_size,
                    minimizers_locations[sequence_rez.last_index] - minimizers_locations[sequence_rez.first_index] +
@@ -97,16 +99,16 @@ void sequence_to_reference_map(std::ifstream &sequences, std::string &reference,
         if (reverse_rez.length != 0)
         {
             setbuf(stdout, 0);
-            printf("%ld %ld %ld %d %d %d\n\n", reverse_rez.length, reverse_rez.first_index,
+            printf("%d %d %d %d %d %d\n\n", reverse_rez.length, reverse_rez.first_index,
                    reverse_rez.last_index, minimizers_locations[reverse_rez.first_index],
                    minimizers_locations[reverse_rez.last_index] + kmer_size,
                    minimizers_locations[reverse_rez.last_index] - minimizers_locations[reverse_rez.first_index] +
                    kmer_size);
         }
 #endif
+
         std::string *better_sequence;
         subsequence_info_t better_rez;
-
         if (sequence_rez.length >= reverse_rez.length) {
 
             better_sequence = &sequence;
@@ -115,57 +117,36 @@ void sequence_to_reference_map(std::ifstream &sequences, std::string &reference,
             better_sequence = &reverse;
             better_rez = reverse_rez;
         }
-        
-        std::pair<std::string, std::string> r;
 
-        if (better_rez.length == 0 || sequence.size() * 1.5 <
+
+        printf("Thread: %d Sequence number: %d Sequence size:%5d, Reference start: %5d, Reference length: %5d ", thread_id, ret, sequence.size(), minimizers_locations[better_rez.first_index],
+        minimizers_locations[better_rez.last_index] - minimizers_locations[better_rez.first_index] + kmer_size);
+
+        if (better_rez.length == 0 || sequence.size() * 2 <
             minimizers_locations[better_rez.last_index] - minimizers_locations[better_rez.first_index] + kmer_size)
+        {
+            printf("Accepted: NO\n");
             continue;
-
-        // used because bad_alloc otherwise
-        if (minimizers_locations[better_rez.last_index] -
-            minimizers_locations[better_rez.first_index] + kmer_size > 10000 && better_sequence->size() > 10000)
-        {
-            int start_index = 0;
-            int len = 10000;
-     
-            while(true)
-            {
-                if (start_index >= minimizers_locations[better_rez.last_index] -
-                                   minimizers_locations[better_rez.first_index] + kmer_size)
-                    break;
-                r = needlemanWunsch(
-                        reference.substr(minimizers_locations[better_rez.first_index] + start_index, len),
-                        better_sequence->substr(start_index, len), -1, -2, -2, 2);
-
-                update_occurrences(start_index, len, r, nucliobase_occurrence);
-                start_index = len + start_index;
-                if (start_index + len > minimizers_locations[better_rez.last_index] -
-                                        minimizers_locations[better_rez.first_index] + kmer_size)
-                    len = minimizers_locations[better_rez.last_index] -
-                          minimizers_locations[better_rez.first_index] + kmer_size - start_index;
-            }
-        }
-        else
-        {
-            r = needlemanWunsch(
-                    reference.substr(minimizers_locations[better_rez.first_index],
-                                     minimizers_locations[better_rez.last_index] -
-                                     minimizers_locations[better_rez.first_index] + kmer_size),
-                    *better_sequence, -1, -2, -2, 2);
-
-            update_occurrences(minimizers_locations[better_rez.first_index],
-                               minimizers_locations[better_rez.last_index] -
-                               minimizers_locations[better_rez.first_index] + kmer_size, r, nucliobase_occurrence);
         }
 
+        printf("Accepted: YES\n");
+
+        r = needlemanWunsch(
+                reference.substr(minimizers_locations[better_rez.first_index],
+                                    minimizers_locations[better_rez.last_index] -
+                                    minimizers_locations[better_rez.first_index] + kmer_size),
+                *better_sequence, -2, -2, -2, 1);
+
+        update_occurrences(minimizers_locations[better_rez.first_index],
+                            minimizers_locations[better_rez.last_index] -
+                            minimizers_locations[better_rez.first_index] + kmer_size, r, nucliobase_occurrence);
 
     }
 }
 
 int main(int argc, char const *argv[]) {
 
-    int kmer_size = 25, minimizer_size = 10;
+    int kmer_size = 26, minimizer_size = 12, num_of_threads = 4;
     std::string reference;
     std::string sequence;
     char file_line[256];
@@ -179,8 +160,25 @@ int main(int argc, char const *argv[]) {
     std::map<int, std::vector<minimizer_info_t>> index_map;
     std::vector<int> minimizers;
     std::vector<int> minimizers_locations;
-    std::string reference_file("data/lambda.fasta");
-    std::string sequence_file("data/lambda_simulated_reads.fasta");
+    std::string reference_file;
+    std::string sequence_file;
+    const char reference_file_c_str[] = "data/lambda.fasta";
+    const char sequence_file_c_str[] = "data/lambda_simulated_reads.fasta";
+    if (argc == 3)
+    {
+        kmer_size = atoi(argv[1]);
+        minimizer_size = atoi(argv[2]);
+    }
+
+    //add getopts if exclusively run on linux
+    kmer_size = argc >= 2 ? atoi(argv[1]) : kmer_size;
+    minimizer_size = argc >= 3 ? atoi(argv[2]) : minimizer_size;
+    num_of_threads = argc >= 4 ? atoi(argv[3]) : num_of_threads;
+    reference_file.assign(argc >= 5 ? argv[4] : reference_file_c_str);
+    sequence_file.assign(argc >= 6 ? argv[5] : sequence_file_c_str);
+
+
+    printf("Using kmer size %d, minimizers size %d, %d threads, reference file %s, sequences file %s\n", kmer_size, minimizer_size, num_of_threads, reference_file.c_str(), sequence_file.c_str());
 
     read_reference(reference_file, reference);
     sequences.open(sequence_file, std::ifstream::in);
@@ -190,7 +188,7 @@ int main(int argc, char const *argv[]) {
 
     std::vector<std::thread> threads;
 
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < num_of_threads; i++) {
         threads.push_back(std::thread(sequence_to_reference_map, std::ref(sequences),
                                       std::ref(reference), std::ref(minimizer_map), std::ref(minimizers),
                                       std::ref(minimizers_locations), std::ref(nucliobase_occurrence),
@@ -203,7 +201,7 @@ int main(int argc, char const *argv[]) {
 
     for (int i = 0; i < reference.size(); i++) {
         occurrence_t occ = nucliobase_occurrence[i];
-        printf("%c  %d %d %d %d\n", reference[i], occ.A, occ.C, occ.G, occ.T);
+        //printf("%c  %d %d %d %d\n", reference[i], occ.A, occ.C, occ.G, occ.T);
     }
 
 

@@ -193,10 +193,12 @@ int read_reference(std::string& file_path, std::string& reference)
 
 int read_sequence(std::ifstream& sequences_file,std::string &sequence)
 {
+    static int sequence_line = 0;
+    sequence_line++;
     char sequence_info[256] = {0};
     if (!sequences_file.is_open()){
         printf("File not open.");
-        return 1;
+        return -1;
     }
 
     sequences_file.getline(sequence_info, 256);
@@ -204,7 +206,7 @@ int read_sequence(std::ifstream& sequences_file,std::string &sequence)
     if ( strlen(sequence_info) == 0)
     {
         sequences_file.close();
-        return 2;
+        return -2;
     }
     while(true)
     {
@@ -214,7 +216,7 @@ int read_sequence(std::ifstream& sequences_file,std::string &sequence)
         sequence.push_back(c);
     }
 
-    return 0;
+    return sequence_line;
 }
 
 
