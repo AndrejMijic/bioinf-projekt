@@ -12,43 +12,43 @@
 #define UP 2
 
 /*
-	Dynamic programming table cell.
+    Dynamic programming table cell.
 */
 struct Cell {
-	int cost;
-	int parent;
+    int cost;
+    int parent;
 
-	Cell(int cost, int parent) : cost{cost}, parent{parent} {}
-	Cell() : cost{0}, parent{0} {}
+    Cell(int cost, int parent) : cost{cost}, parent{parent} {}
+    Cell() : cost{0}, parent{0} {}
 };
 
 /*
-	Sets the value of the cell depending on the costs for matching, insertion and deletion.
+    Sets the value of the cell depending on the costs for matching, insertion and deletion.
 */
 inline void updateCell(Cell& cell, int match, int ins, int del, bool similarity = false) {
 
-	cell.cost = match;
-	cell.parent = UP_LEFT;
+    cell.cost = match;
+    cell.parent = UP_LEFT;
 
-	if(similarity) {
-		if(ins > cell.cost) {
-			cell.cost = ins;
-			cell.parent = LEFT;
-		} 
-		if(del > cell.cost) {
-			cell.cost = del;
-			cell.parent = UP;
-		}
-	} else {
-		if(ins < cell.cost) {
-			cell.cost = ins;
-			cell.parent = LEFT;
-		} 
-		if(del < cell.cost) {
-			cell.cost = del;
-			cell.parent = UP;
-		}	
-	}
+    if(similarity) {
+        if(ins > cell.cost) {
+            cell.cost = ins;
+            cell.parent = LEFT;
+        } 
+        if(del > cell.cost) {
+            cell.cost = del;
+            cell.parent = UP;
+        }
+    } else {
+        if(ins < cell.cost) {
+            cell.cost = ins;
+            cell.parent = LEFT;
+        } 
+        if(del < cell.cost) {
+            cell.cost = del;
+            cell.parent = UP;
+        }	
+    }
 }
 
 

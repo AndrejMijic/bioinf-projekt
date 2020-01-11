@@ -12,7 +12,6 @@ int compare(const char *a, const char *b, const int length)
     }
 
     return 0;
-    
 }
 
 int find_minimizer(const char *kmer_array, int kmer_size, std::string &minimizer, int minimizer_size)
@@ -39,7 +38,7 @@ int find_minimizer(const char *kmer_array, int kmer_size, std::string &minimizer
 
 void minimize_reference(std::string seq, int kmer_size, int minimizer_size,
                        std::map<std::string, int> &minimizer_map, std::map<int,std::vector<minimizer_info_t>> &index_map,
-                       std::vector<int> &minimizers,  std::vector<int> &minimizers_locations)
+                       std::vector<int> &minimizers, std::vector<int> &minimizers_locations)
 {
     int unique_id = 0;
     int minimizer_index;
@@ -104,7 +103,7 @@ void minimize_reference(std::string seq, int kmer_size, int minimizer_size,
 
 void minimize_sequence(std::string seq, int kmer_size, int minimizer_size,
                        std::map<std::string, int> &minimizer_map,
-                       std::vector<int> &minimizers )
+                       std::vector<int> &minimizers ,std::vector<int> &minimizers_locations)
 {
     int minimizer_index;
     int unknown_minimizer_index = -1;
@@ -143,6 +142,7 @@ void minimize_sequence(std::string seq, int kmer_size, int minimizer_size,
                 int id = it->second;
                 minimizers.push_back(id);
             }
+            minimizers_locations.push_back(i);
         }
         prev_minimizer.clear();
         prev_minimizer.assign(minimizer);
@@ -226,7 +226,7 @@ int main()
 int kmer_main()
 #endif
 {
-    int kmer_size = 15, minimizer_size = 5;
+    int kmer_size = 100, minimizer_size = 20;
     std::string reference;
     std::string sequence;
     char file_line[256];
@@ -236,7 +236,9 @@ int kmer_main()
     std::map<std::string, int> minimizer_map;
     std::map<int,std::vector<minimizer_info_t>> index_map;
     std::vector<int> minimizers;
-    std::vector<int> minimizers_locations;
+    std::vector<int> minimizers_locations_ref;
+    std::vector<int> minimizers_locations_seq;
+    std::vector<int> minimizers_locations_rev;
     std::vector<int> sequence_minimizers;
     std::vector<int> sequence_minimizers_reverse;
     std::string reverse;
@@ -248,28 +250,29 @@ int kmer_main()
     if (x == -1)
         return 0;
 
-    minimize_reference(reference, kmer_size, minimizer_size, minimizer_map, index_map, minimizers, minimizers_locations);
+    minimize_reference(reference, kmer_size, minimizer_size, minimizer_map, index_map, minimizers, minimizers_locations_ref);
 
     sequences.open(sequence_file, std::ifstream::in);
 
-    read_sequence(sequences, sequence);
+    for(int i = 0; i< 100; i++)
+        read_sequence(sequences, sequence);
 
-    minimize_sequence(sequence, kmer_size, minimizer_size, minimizer_map, sequence_minimizers);
+    minimize_sequence(sequence, kmer_size, minimizer_size, minimizer_map, sequence_minimizers,  minimizers_locations_ref);
 
     int *a = &minimizers[0];
     int *b = &sequence_minimizers[0];
 
     subsequence_info_t rez = subsequence_size<int>(a, minimizers.size(), b, sequence_minimizers.size());
 
-    printf("sequence original: len %ld minimizer indexes %ld %ld, original indexes %d %d \n",  rez.length, rez.first_index, rez.last_index, minimizers_locations[rez.first_index], minimizers_locations[rez.last_index]);
+    printf("sequence original: len %d minimizer indexes %d %d, original indexes %d %d \n",  rez.length, rez.first_index_ref, rez.last_index_ref, minimizers_locations_ref[rez.first_index_ref], minimizers_locations_ref[rez.last_index_ref]);
 
     create_complement(reverse, sequence);
-    minimize_sequence(reverse, kmer_size, minimizer_size, minimizer_map, sequence_minimizers_reverse);
+    minimize_sequence(reverse, kmer_size, minimizer_size, minimizer_map, sequence_minimizers_reverse,minimizers_locations_rev);
 
     a = &minimizers[0];
     b = &sequence_minimizers_reverse[0];
 
     rez = subsequence_size<int>(a, minimizers.size(), b, sequence_minimizers_reverse.size());
 
-    printf("sequence reverse: len %ld minimizer indexes %ld %ld, original indexes %d %d \n",  rez.length, rez.first_index, rez.last_index, minimizers_locations[rez.first_index], minimizers_locations[rez.last_index]);
+    printf("sequence reverse: len %d minimizer indexes %d %d, original indexes %d %d \n",  rez.length, rez.first_index_ref, rez.last_index_ref, minimizers_locations_ref[rez.first_index_ref], minimizers_locations_ref[rez.last_index_ref]);
 }

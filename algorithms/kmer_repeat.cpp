@@ -27,7 +27,6 @@ int compare(const char *a, const char *b, const int length)
     }
 
     return 0;
-    
 }
 
 int find_minimizer(const char *kmer_array, int kmer_size, std::string &minimizer, int minimizer_size)
@@ -160,7 +159,7 @@ void minimize_sequence(std::string seq, int kmer_size, int minimizer_size,
         }
 
         //std::cout <<minimizer <<"  "<<minimizers.back()<<std::endl;
-        
+
         prev_minimizer.clear();
         prev_minimizer.assign(minimizer);
     }
@@ -220,7 +219,7 @@ int main()
 
 
     subsequence_info_t rez = subsequence_size<int>(a, minimizers.size(), b, sequence_minimizers.size());
-    printf("Subsequence\n Reference first index: %ld, last_index: %ld, length: %ld\n", rez.first_index, rez.last_index, rez.length);
+    printf("Subsequence\n Reference first index: %ld, last_index: %ld, length: %ld\n", rez.first_index_ref, rez.last_index_ref, rez.length);
 
     substring_info_t rez2 = substring_size<int>(a, minimizers.size(), b, sequence_minimizers.size());
     printf("Substring\n Reference first index: %ld, length: %ld\n", rez2.first_index, rez2.length);

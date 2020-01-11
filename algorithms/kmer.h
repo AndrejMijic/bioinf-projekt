@@ -17,8 +17,6 @@ typedef struct minimizer_info
 {
     int index;
     int num_of_frames;
-
-
 } minimizer_info_t;
 
 int compare(const char *a, const char *b, const int length);
@@ -28,7 +26,7 @@ void minimize_reference(std::string seq, int kmer_size, int minimizer_size,
                         std::vector<int> &minimizers,  std::vector<int> &minimizers_locations);
 void minimize_sequence(std::string seq, int kmer_size, int minimizer_size,
                        std::map<std::string, int> &minimizer_map,
-                       std::vector<int> &minimizers );
+                       std::vector<int> &minimizers ,std::vector<int> &minimizers_locations);
 void create_complement(std::string &complement,std::string original);
 int read_reference(std::string& file_path, std::string& reference);
 int read_sequence(std::ifstream& sequences_file,std::string &sequence);

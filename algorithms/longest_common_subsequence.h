@@ -6,8 +6,10 @@
 typedef struct subsequence_info
 {
     int length;
-    int first_index;
-    int last_index;
+    int first_index_ref;
+    int last_index_ref;
+    int first_index_seq;
+    int last_index_seq;
 } subsequence_info_t;
 
 
@@ -17,19 +19,24 @@ subsequence_info_t subsequence_size(T *ref, int ref_size, T *seq, int seq_size)
 {
     subsequence_info_t *ar[2];
     long i, j;
+    int seq_index = 0;
     ar[0] = (subsequence_info_t *)malloc((ref_size + 1) * sizeof(subsequence_info_t));
     ar[1] = (subsequence_info_t *)malloc((ref_size + 1)* sizeof(subsequence_info_t));
 
     for (i = 0; i< ref_size + 1; i++)
     {
         ar[0][i].length = 0;
-        ar[0][i].first_index = -1;
-        ar[0][i].last_index = -1;
+        ar[0][i].first_index_ref = -1;
+        ar[0][i].last_index_ref = -1;
+        ar[0][i].first_index_seq = -1;
+        ar[0][i].last_index_seq = -1;
     }
-    
+
     ar[1][0].length = 0;
-    ar[1][0].first_index = -1;
-    ar[1][0].last_index = -1;
+    ar[1][0].first_index_ref = -1;
+    ar[1][0].last_index_ref = -1;
+    ar[1][0].first_index_seq = -1;
+    ar[1][0].last_index_seq = -1;
 
     subsequence_info_t ret;
     int top_index = 1;
@@ -47,33 +54,37 @@ subsequence_info_t subsequence_size(T *ref, int ref_size, T *seq, int seq_size)
             {
                 if (ar[top_index][j].length == 0)
                 {
-                    ar[bottom_index][j + 1].first_index = j + 1;
-                    ar[bottom_index][j + 1].last_index = j + 1;
+                    ar[bottom_index][j + 1].first_index_ref = j + 1;
+                    ar[bottom_index][j + 1].last_index_ref = j + 1;
+                    ar[bottom_index][j + 1].first_index_seq = seq_index;
+                    ar[bottom_index][j + 1].last_index_seq = seq_index;
                     ar[bottom_index][j + 1].length = 1;
-                    
-
                 }
                 else
                 {
                     ar[bottom_index][j + 1].length = 1 + ar[top_index][j].length;
-                    ar[bottom_index][j + 1].last_index = j + 1;
-                    ar[bottom_index][j + 1].first_index = ar[top_index][j].first_index;
+                    ar[bottom_index][j + 1].last_index_ref = j + 1;
+                    ar[bottom_index][j + 1].first_index_ref = ar[top_index][j].first_index_ref;
+                    ar[bottom_index][j + 1].first_index_seq = ar[top_index][j].first_index_seq;
+                    ar[bottom_index][j + 1].last_index_seq = seq_index;
                 }
             }
             else
             {
                 helper = ar[top_index][j + 1].length >= ar[bottom_index][j].length ? &(ar[top_index][j + 1]) : &(ar[bottom_index][j]);
                 ar[bottom_index][j + 1].length = helper->length;
-                ar[bottom_index][j + 1].first_index = helper->first_index;
-                ar[bottom_index][j + 1].last_index = helper->last_index;
+                ar[bottom_index][j + 1].first_index_ref = helper->first_index_ref;
+                ar[bottom_index][j + 1].last_index_ref = helper->last_index_ref;
+                ar[bottom_index][j + 1].first_index_seq = helper->first_index_seq;
+                ar[bottom_index][j + 1].last_index_seq = helper->last_index_seq;
             }
         }
+        seq_index++;
     }
-    
 
     ret = ar[bottom_index][ref_size];
-    ret.first_index--; // index 0 is for empty array
-    ret.last_index--;
+    ret.first_index_ref--; // index 0 is for empty array
+    ret.last_index_ref--;
     free(ar[0]);
     free(ar[1]);
 
