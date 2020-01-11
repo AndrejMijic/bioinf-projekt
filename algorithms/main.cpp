@@ -38,7 +38,7 @@ void update_occurrences(int start_index, int len, std::pair<std::string, std::st
     }
 
     // thread saftey
-    occurrences_mtx.lock();
+    //occurrences_mtx.lock();
     for (; i <= r.first.size(); i++) 
     {
         if (r.first[i] == '-')
@@ -46,24 +46,34 @@ void update_occurrences(int start_index, int len, std::pair<std::string, std::st
             if (nucliobase_occurrence[index].insert.size() == insert_index)
             {
                 occurrence_t occ;
+                occurrences_mtx.lock();
                 nucliobase_occurrence[index].insert.push_back(occ);
+                occurrences_mtx.unlock();
             }
 
             if (r.second[i] == 'A')
             {
+                occurrences_mtx.lock();
                 nucliobase_occurrence[index].insert[insert_index].A++;
+                occurrences_mtx.unlock();
             }
             else if (r.second[i] == 'C')
             {
+                occurrences_mtx.lock();
                 nucliobase_occurrence[index].insert[insert_index].C++;
+                occurrences_mtx.unlock();
             }
             else if (r.second[i] == 'G')
             {
+                occurrences_mtx.lock();
                 nucliobase_occurrence[index].insert[insert_index].G++;
+                occurrences_mtx.unlock();
             }
             else if (r.second[i] == 'T')
             {
+                occurrences_mtx.lock();
                 nucliobase_occurrence[index].insert[insert_index].T++;
+                occurrences_mtx.unlock();
             }
             insert_index++;
 
@@ -75,27 +85,37 @@ void update_occurrences(int start_index, int len, std::pair<std::string, std::st
         insert_index = 0;
         if (r.second[i] == 'A')
         {
+            occurrences_mtx.lock();
             nucliobase_occurrence[index].A++;
+            occurrences_mtx.unlock();
         }
         else if (r.second[i] == 'C')
         {
+            occurrences_mtx.lock();
             nucliobase_occurrence[index].C++;
+            occurrences_mtx.unlock();
         }
         else if (r.second[i] == 'G')
         {
+            occurrences_mtx.lock();
             nucliobase_occurrence[index].G++;
+            occurrences_mtx.unlock();
         }
         else if (r.second[i] == 'T')
         {
+            occurrences_mtx.lock();
             nucliobase_occurrence[index].T++;
+            occurrences_mtx.unlock();
         }
         else if (r.second[i] == '-')
         {
+            occurrences_mtx.lock();
             nucliobase_occurrence[index].del++;
+            occurrences_mtx.unlock();
         }
     }
     //end thread saftey
-    occurrences_mtx.unlock();
+    //occurrences_mtx.unlock();
 }
 
 void sequence_to_reference_map(std::ifstream &sequences, std::string &reference,
@@ -196,7 +216,7 @@ void sequence_to_reference_map(std::ifstream &sequences, std::string &reference,
 
         printf("Accepted: YES\n");
 
-        r = needlemanWunsch(
+        r = hirschberg(
                 reference.substr(minimizers_locations[better_rez.first_index_ref],
                                     minimizers_locations[better_rez.last_index_ref] -
                                     minimizers_locations[better_rez.first_index_ref] + kmer_size),
