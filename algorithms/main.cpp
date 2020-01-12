@@ -1,18 +1,12 @@
 #include "kmer.h"
 #include "hirschberg.h"
+#include "output.h"
 #include <thread>
 #include <mutex>
+#include "main.h"
 
 #define RPRINT
 
-typedef struct occurrence {
-    int A = 0;
-    int C = 0;
-    int G = 0;
-    int T = 0;
-    int del = 0;
-    std::vector<struct occurrence> insert;
-} occurrence_t;
 
 std::mutex file_mtx;
 std::mutex occurrences_mtx;
@@ -302,4 +296,6 @@ int main(int argc, char const *argv[]) {
         //printf("\n");
         rez_file << std::endl;
     }
+
+    write_to_CSV("test1.csv", nucliobase_occurrence, 5, reference);
 }

@@ -1,3 +1,6 @@
+#ifndef _MAIN_H
+#define _MAIN_H
+
 typedef struct occurrence {
     int A = 0;
     int C = 0;
@@ -6,3 +9,5 @@ typedef struct occurrence {
     int del = 0;
     std::vector<struct occurrence> insert;
 } occurrence_t;
+
+#endif
