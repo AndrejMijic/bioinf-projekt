@@ -1,5 +1,5 @@
-#ifndef _KMER_H
-#define _KMER_H
+#ifndef KMER_H_
+#define KMER_H_
 
 #include <stdio.h>
 #include <algorithm>
@@ -13,11 +13,11 @@
 #include "longest_common_subsequence.h"
 
 
-typedef struct minimizer_info
+struct minimizer_info_t 
 {
     int index;
     int num_of_frames;
-} minimizer_info_t;
+};
 
 int compare(const char *a, const char *b, const int length);
 int find_minimizer(const char *kmer_array, int kmer_size, std::string &minimizer, int minimizer_size);
@@ -31,4 +31,4 @@ void create_complement(std::string &complement,std::string original);
 int read_reference(std::string& file_path, std::string& reference);
 int read_sequence(std::ifstream& sequences_file,std::string &sequence);
 
-#endif //_KMER_H
+#endif // KMER_H_

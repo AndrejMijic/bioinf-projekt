@@ -1,19 +1,24 @@
-#ifndef _SUBSEQUENCE_H
-#define _SUBSEQUENCE_H
+#ifndef SUBSEQUENCE_H_
+#define SUBSEQUENCE_H_
 #include <malloc.h>
 #include <stdio.h>
 
-typedef struct subsequence_info
+
+/*
+    Structure that holds the longest common subsequence result.
+*/
+struct subsequence_info_t
 {
     int length;
     int first_index_ref;
     int last_index_ref;
     int first_index_seq;
     int last_index_seq;
-} subsequence_info_t;
+};
 
-
-//because of template
+/*
+    Calculates the longest common subsequence between the given strings.
+*/
 template<typename T>
 subsequence_info_t subsequence_size(T *ref, int ref_size, T *seq, int seq_size)
 {
@@ -91,4 +96,4 @@ subsequence_info_t subsequence_size(T *ref, int ref_size, T *seq, int seq_size)
     return ret;
 }
 
-#endif // _SUBSEQUENCE_H
+#endif // SUBSEQUENCE_H_

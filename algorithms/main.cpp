@@ -11,7 +11,11 @@
 std::mutex file_mtx;
 std::mutex occurrences_mtx;
 
-//doesn't work but should count what bases occur on what indexes
+
+/*
+    Uses hirschberg alignment results to create a vector ofoccurrence_t structures
+    which count mutation votes for each index of the reference genome. 
+*/
 void update_occurrences(int start_index, int len, std::pair<std::string, std::string> &r,
                        std::vector<occurrence_t> &nucliobase_occurrence)
 {
@@ -31,8 +35,6 @@ void update_occurrences(int start_index, int len, std::pair<std::string, std::st
         }
     }
 
-    // thread saftey
-    //occurrences_mtx.lock();
     for (; i <= r.first.size(); i++) 
     {
         if (r.first[i] == '-')
@@ -108,10 +110,12 @@ void update_occurrences(int start_index, int len, std::pair<std::string, std::st
             occurrences_mtx.unlock();
         }
     }
-    //end thread saftey
-    //occurrences_mtx.unlock();
 }
 
+/*
+    Maps the sequencing results to the reference genome using minimizers,
+    then aligns them using the hirschberg algorithm.
+*/
 void sequence_to_reference_map(std::ifstream &sequences, std::string &reference,
                                std::map<std::string, int> &minimizer_map,
                                std::vector<int> &minimizers,
@@ -284,16 +288,13 @@ int main(int argc, char const *argv[]) {
 
     for (int i = 0; i < reference.size(); i++) {
         occurrence_t occ = nucliobase_occurrence[i];
-        //printf("%c  %d %d %d %d %d ", reference[i], occ.A, occ.C, occ.G, occ.T, occ.del);
         rez_file << reference[i]<<" " << occ.A << " " << occ.C << " " << occ.G << " " <<  occ.T << " " << occ.del;
         int j = 0;
         for (auto & a : occ.insert)
         {
-        //    printf("  %d  %d %d %d %d  ", j, a.A, a.C, a.G, a.T);
             rez_file << "  " << j << "| " <<  a.A << " "  << a.C << " " <<  a.G << " " << a.T;
             j++;
         }
-        //printf("\n");
         rez_file << std::endl;
     }
 

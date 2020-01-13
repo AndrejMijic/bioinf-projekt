@@ -1,5 +1,9 @@
 #include "kmer.h"
 
+
+/*
+    Compares strings lexicographically.
+*/
 int compare(const char *a, const char *b, const int length)
 {
     int i = 0;
@@ -14,6 +18,9 @@ int compare(const char *a, const char *b, const int length)
     return 0;
 }
 
+/*
+    
+*/
 int find_minimizer(const char *kmer_array, int kmer_size, std::string &minimizer, int minimizer_size)
 {
     int index;
@@ -35,7 +42,9 @@ int find_minimizer(const char *kmer_array, int kmer_size, std::string &minimizer
     return index;
 }
 
-
+/*
+    Creates minimizers from a reference genome.
+*/
 void minimize_reference(std::string seq, int kmer_size, int minimizer_size,
                        std::map<std::string, int> &minimizer_map, std::map<int,std::vector<minimizer_info_t>> &index_map,
                        std::vector<int> &minimizers, std::vector<int> &minimizers_locations)
@@ -101,6 +110,9 @@ void minimize_reference(std::string seq, int kmer_size, int minimizer_size,
     }
 }
 
+/*
+    Creates minimizers from a genome sequencing result.
+*/
 void minimize_sequence(std::string seq, int kmer_size, int minimizer_size,
                        std::map<std::string, int> &minimizer_map,
                        std::vector<int> &minimizers ,std::vector<int> &minimizers_locations)
@@ -149,7 +161,10 @@ void minimize_sequence(std::string seq, int kmer_size, int minimizer_size,
     }
 }
 
-void create_complement(std::string &complement,std::string original)
+/*
+    Creates a complementary base sequence to the given original one.
+*/
+void create_complement(std::string &complement, std::string original)
 {
     std::reverse(original.begin(), original.end());
 
@@ -166,6 +181,10 @@ void create_complement(std::string &complement,std::string original)
     }
 }
 
+
+/*
+    Reads a reference genome from a file.
+*/
 int read_reference(std::string& file_path, std::string& reference)
 {
     std::ifstream file;
@@ -191,7 +210,10 @@ int read_reference(std::string& file_path, std::string& reference)
     return 0;
 }
 
-int read_sequence(std::ifstream& sequences_file,std::string &sequence)
+/*
+    Read a genome sequencing result from a file.
+*/
+int read_sequence(std::ifstream& sequences_file, std::string &sequence)
 {
     static int sequence_line = 0;
     sequence_line++;

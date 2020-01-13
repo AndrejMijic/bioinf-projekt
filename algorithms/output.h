@@ -1,5 +1,6 @@
-#ifndef _OUTPUT_H
-#define _OUTPUT_H
+#ifndef OUTPUT_H_
+#define OUTPUT_H_
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -8,6 +9,7 @@
 
 #include "main.h"
 
-void write_to_CSV(std::string filename, std::vector<occurrence_t>& occurences, int minCoverage, std::string& refGenome);
-#endif
+void write_to_CSV(std::string filename, std::vector<occurrence_t>& occurences, int min_coverage, std::string& ref_genome);
+
+#endif // OUTPUT_H_
 

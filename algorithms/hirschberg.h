@@ -1,5 +1,5 @@
-#ifndef _HIRSCHBERG_H
-#define _HIRSCHBERG_H
+#ifndef HIRSCHBERG_H_
+#define HIRSCHBERG_H_
 
 #include <string>
 #include <algorithm>
@@ -25,7 +25,7 @@ struct Cell {
 /*
     Sets the value of the cell depending on the costs for matching, insertion and deletion.
 */
-inline void updateCell(Cell& cell, int match, int ins, int del, bool similarity = false) {
+inline void update_cell(Cell& cell, int match, int ins, int del, bool similarity = false) {
 
     cell.cost = match;
     cell.parent = UP_LEFT;
@@ -52,9 +52,9 @@ inline void updateCell(Cell& cell, int match, int ins, int del, bool similarity 
 }
 
 
-void needlemanWunschScore(const std::string& x, const std::string& y, std::vector<int>& upperLine, std::vector<int>& lowerLine, int sub, int del, int ins, int match);
-std::pair<std::string, std::string>  needlemanWunsch(const std::string& x, const std::string& y, int ins, int del, int sub, int match);
-std::pair<std::string, std::string> hirschbergAlgorithm(const std::string& x, const std::string& y, const std::string& reverseX, const std::string& reverseY, std::vector<int>& upperLine, std::vector<int>& lowerLine, std::vector<int>& bufferLine, int sub, int del, int ins, int match);
+void needleman_wunsch_score(const std::string& x, const std::string& y, std::vector<int>& upperLine, std::vector<int>& lowerLine, int sub, int del, int ins, int match);
+std::pair<std::string, std::string>  needleman_wunsch(const std::string& x, const std::string& y, int ins, int del, int sub, int match);
+std::pair<std::string, std::string> hirschberg_algorithm(const std::string& x, const std::string& y, const std::string& reverseX, const std::string& reverseY, std::vector<int>& upperLine, std::vector<int>& lowerLine, std::vector<int>& bufferLine, int sub, int del, int ins, int match);
 std::pair<std::string, std::string> hirschberg(const std::string& x, const std::string& y, int sub, int del, int ins, int match);
 
-#endif //_HIRSCHBERG_H
+#endif // HIRSCHBERG_H_
