@@ -5,4 +5,4 @@ Projekt iz bioinformatike, za 100 bodova
 Pokrenuti make.
 
 # Upute za pokretanje
-Pokrenuti mutation_checker
+Pokrenuti mutation_checker.
