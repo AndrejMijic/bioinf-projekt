@@ -219,7 +219,7 @@ int read_sequence(std::ifstream& sequences_file, std::string &sequence)
     sequence_line++;
     char sequence_info[256] = {0};
     if (!sequences_file.is_open()){
-        printf("File not open.");
+        printf("File not open.\n");
         return -1;
     }
 

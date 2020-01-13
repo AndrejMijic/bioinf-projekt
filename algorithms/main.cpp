@@ -4,6 +4,7 @@
 #include <thread>
 #include <mutex>
 #include "main.h"
+#include <cstdlib>
 
 #define RPRINT
 
@@ -221,7 +222,7 @@ void sequence_to_reference_map(std::ifstream &sequences, std::string &reference,
                 better_sequence->substr(better_minimizer_locations->at(better_rez.first_index_seq),
                 better_minimizer_locations->at(better_rez.last_index_seq) -
                 better_minimizer_locations->at(better_rez.first_index_seq) + kmer_size), -3, -3, -3, 2);
-        //std::cout << r.first << "\n" << r.second << "\n\n";
+
         update_occurrences(minimizers_locations[better_rez.first_index_ref],
                             minimizers_locations[better_rez.last_index_ref] -
                             minimizers_locations[better_rez.first_index_ref] + kmer_size, r, nucliobase_occurrence);
@@ -230,7 +231,11 @@ void sequence_to_reference_map(std::ifstream &sequences, std::string &reference,
 
 int main(int argc, char const *argv[]) {
 
-    int kmer_size = 26, minimizer_size = 12, num_of_threads = 4;
+    if(argc != 6 + 1) {
+        std::cout << "Usage: mutation_checker <kmer_size> <minimizer_size> <number_of_threads> <reference_genome_path> <sequencing_results_path> <output_path>\n";
+        return 0;
+    }
+
     std::string reference;
     std::string sequence;
     char file_line[256];
@@ -244,22 +249,43 @@ int main(int argc, char const *argv[]) {
     std::map<int, std::vector<minimizer_info_t>> index_map;
     std::vector<int> minimizers;
     std::vector<int> minimizers_locations;
-    std::string reference_file;
-    std::string sequence_file;
-    const char reference_file_c_str[] = "data/lambda.fasta";
-    const char sequence_file_c_str[] = "data/lambda_simulated_reads.fasta";
-    if (argc == 3)
-    {
-        kmer_size = atoi(argv[1]);
-        minimizer_size = atoi(argv[2]);
-    }
 
-    //add getopts if exclusively run on linux
-    kmer_size = argc >= 2 ? atoi(argv[1]) : kmer_size;
-    minimizer_size = argc >= 3 ? atoi(argv[2]) : minimizer_size;
-    num_of_threads = argc >= 4 ? atoi(argv[3]) : num_of_threads;
-    reference_file.assign(argc >= 5 ? argv[4] : reference_file_c_str);
-    sequence_file.assign(argc >= 6 ? argv[5] : sequence_file_c_str);
+    int kmer_size = atoi(argv[1]);
+    if (kmer_size == 0) {
+        std::cout << "Invalid k-mer size.\n";
+        std::exit(1);
+    }
+    int minimizer_size = atoi(argv[2]);
+    if (minimizer_size == 0) {
+        std::cout << "Invalid minimizer size.\n";
+        std::exit(1);
+    }
+    int num_of_threads = atoi(argv[3]);
+    if (num_of_threads == 0) {
+        std::cout << "Invalid number of threads.\n";
+        std::exit(1);
+    }
+    std::string reference_file = argv[4];
+    std::string sequence_file = argv[5];
+    std::string output_file = argv[6];
+
+    {
+        std::ifstream ref(reference_file);
+        if (!ref) {
+            std::cout << "Invalid reference file path.\n";
+            std::exit(1);
+        }         
+        std::ifstream seq(sequence_file);
+        if (!seq) {
+            std::cout << "Invalid sequence file path.\n";
+            std::exit(1);
+        }         
+        std::ifstream out(reference_file);
+        if (!out) {
+            std::cout << "Invalid reference file path.\n";
+            std::exit(1);
+        }         
+    }
 
     printf("Using kmer size %d, minimizers size %d, %d threads, reference file %s, sequences file %s\n", kmer_size, minimizer_size, num_of_threads, reference_file.c_str(), sequence_file.c_str());
 
@@ -282,21 +308,5 @@ int main(int argc, char const *argv[]) {
         thread.join();
     }
 
-    std::ofstream rez_file;
-    std::string rez_file_name("rez.report");
-    rez_file.open(rez_file_name, std::fstream::out);
-
-    for (int i = 0; i < reference.size(); i++) {
-        occurrence_t occ = nucliobase_occurrence[i];
-        rez_file << reference[i]<<" " << occ.A << " " << occ.C << " " << occ.G << " " <<  occ.T << " " << occ.del;
-        int j = 0;
-        for (auto & a : occ.insert)
-        {
-            rez_file << "  " << j << "| " <<  a.A << " "  << a.C << " " <<  a.G << " " << a.T;
-            j++;
-        }
-        rez_file << std::endl;
-    }
-
-    write_to_CSV("test1.csv", nucliobase_occurrence, 5, reference);
+    write_to_CSV(output_file, nucliobase_occurrence, 5, reference);
 }
