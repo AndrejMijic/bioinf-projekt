@@ -231,8 +231,8 @@ void sequence_to_reference_map(std::ifstream &sequences, std::string &reference,
 
 int main(int argc, char const *argv[]) {
 
-    if(argc != 6 + 1) {
-        std::cout << "Usage: mutation_checker <kmer_size> <minimizer_size> <number_of_threads> <reference_genome_path> <sequencing_results_path> <output_path>\n";
+    if(argc != 7 + 1) {
+        std::cout << "Usage: mutation_checker <kmer_size> <minimizer_size> <number_of_threads> <mutation_voting_threshold> <reference_genome_path> <sequencing_results_path> <output_path>\n";
         return 0;
     }
 
@@ -265,9 +265,15 @@ int main(int argc, char const *argv[]) {
         std::cout << "Invalid number of threads.\n";
         std::exit(1);
     }
-    std::string reference_file = argv[4];
-    std::string sequence_file = argv[5];
-    std::string output_file = argv[6];
+    int voting_threshold = atoi(argv[4]);
+    if (voting_threshold == 0) {
+        std::cout << "Invalid voting threshold.\n";
+        std::exit(1);        
+    }
+
+    std::string reference_file = argv[5];
+    std::string sequence_file = argv[6];
+    std::string output_file = argv[7];
 
     {
         std::ifstream ref(reference_file);
@@ -308,5 +314,5 @@ int main(int argc, char const *argv[]) {
         thread.join();
     }
 
-    write_to_CSV(output_file, nucliobase_occurrence, 5, reference);
+    write_to_CSV(output_file, nucliobase_occurrence, voting_threshold, reference);
 }
