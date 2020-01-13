@@ -11,7 +11,6 @@
 std::mutex file_mtx;
 std::mutex occurrences_mtx;
 
-//doesn't work but should count what bases occur on what indexes
 void update_occurrences(int start_index, int len, std::pair<std::string, std::string> &r,
                        std::vector<occurrence_t> &nucliobase_occurrence)
 {
@@ -31,8 +30,6 @@ void update_occurrences(int start_index, int len, std::pair<std::string, std::st
         }
     }
 
-    // thread saftey
-    //occurrences_mtx.lock();
     for (; i <= r.first.size(); i++) 
     {
         if (r.first[i] == '-')
@@ -108,8 +105,6 @@ void update_occurrences(int start_index, int len, std::pair<std::string, std::st
             occurrences_mtx.unlock();
         }
     }
-    //end thread saftey
-    //occurrences_mtx.unlock();
 }
 
 void sequence_to_reference_map(std::ifstream &sequences, std::string &reference,
@@ -217,7 +212,7 @@ void sequence_to_reference_map(std::ifstream &sequences, std::string &reference,
                 better_sequence->substr(better_minimizer_locations->at(better_rez.first_index_seq),
                 better_minimizer_locations->at(better_rez.last_index_seq) -
                 better_minimizer_locations->at(better_rez.first_index_seq) + kmer_size), -3, -3, -3, 2);
-        //std::cout << r.first << "\n" << r.second << "\n\n";
+        
         update_occurrences(minimizers_locations[better_rez.first_index_ref],
                             minimizers_locations[better_rez.last_index_ref] -
                             minimizers_locations[better_rez.first_index_ref] + kmer_size, r, nucliobase_occurrence);
@@ -284,16 +279,13 @@ int main(int argc, char const *argv[]) {
 
     for (int i = 0; i < reference.size(); i++) {
         occurrence_t occ = nucliobase_occurrence[i];
-        //printf("%c  %d %d %d %d %d ", reference[i], occ.A, occ.C, occ.G, occ.T, occ.del);
         rez_file << reference[i]<<" " << occ.A << " " << occ.C << " " << occ.G << " " <<  occ.T << " " << occ.del;
         int j = 0;
         for (auto & a : occ.insert)
         {
-        //    printf("  %d  %d %d %d %d  ", j, a.A, a.C, a.G, a.T);
             rez_file << "  " << j << "| " <<  a.A << " "  << a.C << " " <<  a.G << " " << a.T;
             j++;
         }
-        //printf("\n");
         rez_file << std::endl;
     }
 
