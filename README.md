@@ -1,17 +1,19 @@
 # bioinf-projekt
-Projekt iz bioinformatike, za 100 bodova
+Project as part of the [Bioinformatics](https://www.fer.unizg.hr/predmet/bio) class at the [Faculty of Electrical Engineering and Computing](https://www.fer.unizg.hr/) at the [University of Zagreb] (http://www.unizg.hr/).
 
-# Upute za instalaciju
-Pokrenuti make.
+Authors: Andrej Mijić, Ilija Domislović, Zorica Žitko.
 
-# Upute za pokretanje
-Pokrenuti mutation_checker.
+# Installation instructions
+Run make.
+
+# Running the program
+Run mutation_checker with all 7 input arguments.
 
 Ulazni argumenti:<br/>
-kmer_size<br/>
-minimizer_size<br/>
-number_of_threads - Broj dretvi koji će program koristiti.<br/>
-mutation_voting_threshold - Granica koja određuje koliko poravnatih sekvenci treba reći da se dogodila mutacija na nekom indeksu kako bi se ta mutacija upisala u konačno rješenje.<br/>
-reference_genome_path - Put do datoteke koja sadrži referentni genom.<br/>
-sequencing_results_path - Put do datoteke koja sadrži očitanja.<br/>
-output_path - Put do datoteke u koju se upisuje rezultat u .csv formatu.<br/>
+kmer_size - Length of substring which will be indexed.<br/>
+minimizer_size - Length of each minimizer.<br/>
+number_of_threads - The number of threads the program will use.<br/>
+mutation_voting_threshold - Threshold that defines how many aligned sequences need to vote for a mutation for that mutation to be entered into the final solution.<br/>
+reference_genome_path - Path to reference genome file.<br/>
+sequencing_results_path - Path to sequencing results file.<br/>
+output_path - Path to output .csv file.<br/>
