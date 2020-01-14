@@ -1,4 +1,4 @@
-# bioinf-projekt
+# Finding mutations using third-generation sequencing results
 Project as part of the [Bioinformatics](https://www.fer.unizg.hr/predmet/bio) class at the [Faculty of Electrical Engineering and Computing](https://www.fer.unizg.hr/) at the [University of Zagreb] (http://www.unizg.hr/).
 
 Authors: Andrej Mijić, Ilija Domislović, Zorica Žitko.
