@@ -17,3 +17,8 @@ mutation_voting_threshold - Threshold that defines how many aligned sequences ne
 reference_genome_path - Path to reference genome file.<br/>
 sequencing_results_path - Path to sequencing results file.<br/>
 output_path - Path to output .csv file.<br/>
+
+# Evaluating results
+Run jaccard.py -a <path_1> -b <path_2>
+
+For path 1 and path 2 use the output of the mutation_checker program and the actual list of mutations.
