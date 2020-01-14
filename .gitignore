@@ -31,7 +31,10 @@
 *.out
 *.app
 
-*.csv
-*.txt
-*.report
+./*.csv
+./*.txt
+./*.report
 
+src/*.csv
+src/*.report
+src/*.txt
