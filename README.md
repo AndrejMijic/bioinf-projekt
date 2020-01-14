@@ -4,7 +4,7 @@ Project as part of the [Bioinformatics](https://www.fer.unizg.hr/predmet/bio) cl
 Authors: Andrej Mijić, Ilija Domislović, Zorica Žitko.
 
 # Installation instructions
-Run make.
+Run make, then run make clean.
 
 # Running the program
 Run mutation_checker with all 7 input arguments.
