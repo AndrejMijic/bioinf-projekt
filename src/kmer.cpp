@@ -201,10 +201,12 @@ int read_reference(std::string& file_path, std::string& reference)
 
     while (true)
     {
-        file.getline(file_line, 256);
-        if (strlen(file_line) == 0)
+        char c = (char) file.get();
+        if (c == '\n')
+            continue;
+        if(file.eof())
             break;
-        reference.append(file_line);
+        reference.push_back(c);
     }
 
     return 0;
